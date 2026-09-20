@@ -1,3 +1,7 @@
+# Goal ----
+# Pull data from GitHub repo and recreate some of the figures in the Yin et al manuscript
+
+
 # Load libraries ----
 library(tidyverse)
 library(here)
@@ -9,13 +13,15 @@ full_corpus <- read_csv("https://raw.githubusercontent.com/rustlab1/PreprintPape
 
 
 # Explore data ----
-nrow(full_corpus)
+nrow(full_corpus)              # 72,644
 head(full_corpus, 10)
 glimpse(full_corpus)
 
 
 # Preprint and published years ----
 summary(full_corpus$preprint_date)
+## range from 2014-01-13 to 2025-02-23
+
 summary(full_corpus$published_date)
 
 full_corpus %>%
@@ -28,7 +34,13 @@ full_corpus %>%
   count(published_year)
 
 
-# Subject field ----
+# Overall change (Figure 1a and 1b) ----
+full_corpus %>%
+  count()
+
+
+
+# Subject field (Figure 1d) ----
 full_corpus %>%
   count(preprint_category, name = "no_preprint") %>%
   mutate(percent = no_preprint / sum(no_preprint) * 100) %>%
@@ -63,5 +75,5 @@ ggsave(path = here("graphs"), filename = "figure_1d_revision-rate-by-field.png",
        width = 6, height = 4, dpi = 300, unit = "in")  
 
 
-
+# 
 
