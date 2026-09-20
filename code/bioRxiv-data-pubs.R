@@ -204,10 +204,10 @@ biorxiv_pubs_combined_data %>%
 pairs_within_date_range <- biorxiv_pubs_combined_data %>%  # 162,259 preprint-publication pairs
   filter(preprint_date >= ymd("2018-01-01"), 
          preprint_date <= ymd("2025-12-31")) %>%           # 148,743 pairs
-  filter(preprint_date >= ymd("2021-01-01"), 
-         preprint_date <= ymd("2025-02-28"))               # 81,494 pairs
+  filter(published_date >= ymd("2021-01-01"), 
+         published_date <= ymd("2025-02-28"))              # 86,246 pairs
 
-nrow(pairs_within_date_range)        # 81,494 pairs
+nrow(pairs_within_date_range)        # 86,246 pairs
 
 ## Also based on Yin et al's inclusion criteria in the Methods section
 ## Pairs were included in the analysis if both abstracts were in English and 
@@ -221,7 +221,7 @@ pairs_meeting_criteria <- pairs_within_date_range %>%
   filter(nchar(preprint_abstract) >= 100) %>%
   filter(cld2::detect_language(preprint_abstract) == "en")
 
-nrow(pairs_meeting_criteria)          # 81,483 pairs
+nrow(pairs_meeting_criteria)          # 86,230 pairs
 
 
 ## Venn diagram of preprint doi in pairs_meeting_criteria vs full_corpus
@@ -251,7 +251,6 @@ preprint_doi <- tibble(
   mutate(review_set = (biorxiv_doi %in% pairs_meeting_criteria$biorxiv_doi),
          manuscript_set = (biorxiv_doi %in% full_corpus$biorxiv_doi))
 
-head(preprint_doi)
 preprint_doi %>%
   count(review_set, manuscript_set)          # should match numbers in Venn Diagram
 

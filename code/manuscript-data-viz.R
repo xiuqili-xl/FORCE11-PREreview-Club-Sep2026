@@ -130,15 +130,15 @@ ggsave(path = here("graphs"), filename = "figure_1d_main-claim-change-by-field.p
 # Over the years (Figure 2c)  ----
 primary_content_over_time <- full_corpus %>%
   mutate(preprint_year = year(preprint_date)) %>% 
-  count(year, primary_label) %>%
-  group_by(year) %>%
+  count(preprint_year, primary_label) %>%
+  group_by(preprint_year) %>%
   mutate(percent = n / sum(n) * 100) %>%
   ungroup() %>%
-  filter(year >= 2018,     # remove the 101 preprints from 2014-2017
-         year < 2025)      # remove 2025 bc it's not in the graph                 
+  filter(preprint_year >= 2018,     # remove the 101 preprints from 2014-2017
+         preprint_year < 2025)      # remove 2025 bc it's not in the graph                 
 
 ggplot(data = primary_content_over_time,
-       mapping = aes(x = year, y = percent, group = primary_label, color = primary_label)) +
+       mapping = aes(x = preprint_year, y = percent, group = primary_label, color = primary_label)) +
   geom_line() +
   geom_point() +
   scale_color_manual(values = c("major" = "salmon", "minor" = "gold", "unchanged" = "palegreen4")) +

@@ -35,7 +35,7 @@ time_to_pub_manuscript_stats <- time_to_pub_manuscript %>%
   group_by(preprint_year, no_pairs_label) %>%
   summarise(time_to_pub_median = median(time_to_pub)) %>%
   ungroup() %>%
-  # assume data was extracted Apr 2026 
+  # assume data was extracted in Apr 2026 by Yin et al, when codebook was locked 
   mutate(time_to_pub_cutoff = ymd("2026-04-15") - ymd(paste0(preprint_year, "-01-01")))
 
 
