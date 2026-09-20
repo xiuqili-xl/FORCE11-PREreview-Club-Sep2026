@@ -176,10 +176,10 @@ biorxiv_combined_data %>%
   # join stats retrieved with `rbiorxiv` and test if the number of new papers match
   left_join(biorxiv_monthly_stats %>% select(month, new_papers), by = "month") %>%
   mutate(match_stat = (new == new_papers)) %>%
-  view()
+  view()         # match_stats all TRUE
 
 ## so... new papers are marked version == 1
-## note, different versions of the same preprint in bioRxiv share the same doi
+## note, different versions of the same bioRxiv preprint share the same doi
 ## so to pull original preprint date from details dataset, we should filter for version == 1
 
 
@@ -198,15 +198,7 @@ preprint_doi_joined <- preprint_doi %>%
 ## Investigate versioning ----
 preprint_doi_joined %>%
   count(review_set, manuscript_set, upload)
-
-## Discussion section "we analyze exclusively the first posted version of the preprint"
-preprint_doi_joined %>%
-  filter(manuscript_set == TRUE, upload == "update") %>%
-  view()
-
-
-
-head(biorxiv_combined_data)
+## so... all preprints in preprint_doi can be linked to a new upload as identified by version == 1 in `/pubs/`
 
 
 

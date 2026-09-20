@@ -187,8 +187,13 @@ unique(biorxiv_pubs_combined_data$preprint_platform)     # bioRxiv
 summary(biorxiv_pubs_combined_data$preprint_date)        # Min: 2013-11-07; Max: 2026-02-26
 summary(biorxiv_pubs_combined_data$published_date)       # Min: 2013-12-10; Max: 2025-12-31
 
-## note, data from this API endpoint is missing preprint version info, 
-## so questions remain how are preprint versions handled?
+biorxiv_pubs_combined_data %>%
+  count(biorxiv_doi) %>%
+  filter(n > 1)               
+## only 4 out of 162,259 has duplicate doi's
+## since all versions of the same bioRxiv preprint share the same doi
+## presumably, the /pubs/ endpoint is for specific preprints, accounting for all verisions
+## question now: is preprint_date the date for version 1 or later?
 
 
 ## Based on Yin et al's inclusion criteria in the Methods section
@@ -254,7 +259,9 @@ write_csv(preprint_doi, here("data_processed", "preprint_doi.csv"))
 
 
 
+
 # Pull abstract from PubMed ----
+
 ## First, define function for pulling abstract info from PubMed
 get_abstract <- function(doi) {
   # search pubmed for DOI
