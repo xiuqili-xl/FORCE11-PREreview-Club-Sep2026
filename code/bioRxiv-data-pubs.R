@@ -224,7 +224,7 @@ pairs_meeting_criteria <- pairs_within_date_range %>%
 nrow(pairs_meeting_criteria)          # 86,230 pairs
 
 
-## Venn diagram of preprint doi in pairs_meeting_criteria vs full_corpus
+## Venn diagram of preprint doi in pairs_meeting_criteria vs full_corpus ----
 preprint_doi_list <- list(biorxiv_api = pairs_meeting_criteria$biorxiv_doi, 
                           manuscript = full_corpus$biorxiv_doi)
 
@@ -238,10 +238,37 @@ ggVennDiagram::ggVennDiagram(preprint_doi_list) +
 ggsave(filename = "exploration_preprint-doi_venn-diagram.png", path = here("graphs"),
        width = 5, height = 4, dpi = 300, unit = "in", bg = "white")
 
-## Potential causes of difference include
+
+## Explore 113 preprints in Yin et al manuscript (full_corpus) but not in 
+## bioRxiv API data (pairs_meeting_criteria)
+full_corpus %>%
+  filter(!biorxiv_doi %in% pairs_meeting_criteria$biorxiv_doi) %>%
+  count(year)
+## contains the 101 record published between 2014-2017
+
+full_corpus_discrepency <- full_corpus %>%
+  filter(!biorxiv_doi %in% pairs_meeting_criteria$biorxiv_doi) %>%
+  filter(year >= 2018)
+
+
+## test if these are in pairs_within_date_range
+pairs_within_date_range %>%
+  filter(biorxiv_doi %in% full_corpus_discrepency$biorxiv_doi) %>%
+  mutate(abstract_word_count = nchar(preprint_abstract),
+         abstract_language = cld2::detect_language(preprint_abstract)) %>%
+  select(biorxiv_doi, preprint_date, published_doi, published_date,
+         abstract_language, abstract_word_count, preprint_abstract, preprint_category) %>%
+  view()
+## looks like these 12 got filtered out bc of inaccuracies in language assignment
+
+
+## Potential causes for 16% in biorxiv_api but not in Yin et al manuscript
 ## (1) bioRxiv continuously update preprint-publication pair
 ## (2) the biorxiv_api set does not consider versioning, since that's not a variable in /pubs/ endpoint
+##     though, different versions of the same bioRxiv preprint share doi, and there is minimal doi repeat
+##.    this is unlikely to be a strong factor
 ## (3) biorxiv_api hasn't been filtered based on published abstract (100 words, English)
+
 
 
 ## Export preprint_doi dataset ----
@@ -259,8 +286,7 @@ write_csv(preprint_doi, here("data_processed", "preprint_doi.csv"))
 
 
 
-# Pull abstract from PubMed ----
-
+# BACKUP | Pull abstract from PubMed ----
 ## First, define function for pulling abstract info from PubMed
 get_abstract <- function(doi) {
   # search pubmed for DOI
@@ -307,3 +333,81 @@ published_abstracts <- do.call(
   rbind,
   lapply(pairs_within_date_range$published_doi[1:5], get_abstract)
 )
+
+
+
+# BACKUP | Extract data from bioRxiv API by doi ----
+get_biorxiv_pubs_by_doi <- function(biorxiv_doi, server = "biorxiv") {
+  server <- match.arg(server, c("biorxiv", "medrxiv"))
+  
+  doi <- biorxiv_doi %>%
+    as.character() %>%
+    str_trim() %>%
+    str_remove(regex("^https?://(dx\\.)?doi\\.org/", ignore_case = TRUE))
+  
+  if (any(is.na(doi) | doi == "")) {
+    stop("`biorxiv_doi` cannot contain missing or empty values.",
+         call. = FALSE)
+  }
+  
+  if (any(!str_detect(doi, regex("^10\\.1101/", ignore_case = TRUE)))) {
+    stop("All values must be bioRxiv or medRxiv DOIs beginning with `10.1101/`.",
+         call. = FALSE)
+  }
+  
+  fetch_one <- function(current_doi) {
+    url <- sprintf(
+      "https://api.biorxiv.org/pubs/%s/%s",
+      server,
+      current_doi
+    )
+    
+    response <- request(url) %>%
+      req_user_agent("R bioRxiv publication metadata request") %>%
+      req_retry(
+        max_tries = 4,
+        max_seconds = 300,
+        retry_on_failure = TRUE
+      ) %>%
+      req_timeout(seconds = 90) %>%
+      req_perform()
+    
+    body <- resp_body_json(response, simplifyVector = TRUE)
+    records <- body$collection
+    
+    # Preserve the requested DOI when the API has no publication record.
+    if (is.null(records) || length(records) == 0L) {
+      return(
+        tibble(
+          biorxiv_doi = current_doi,
+          preprint_date = as.Date(NA),
+          published_doi = NA_character_,
+          published_date = as.Date(NA),
+          api_match = FALSE
+        )
+      )
+    }
+    
+    records %>%
+      as_tibble() %>%
+      rename_with(
+        ~ "biorxiv_doi",
+        any_of("preprint_doi")
+      ) %>%
+      transmute(
+        biorxiv_doi,
+        preprint_date = as.Date(preprint_date),
+        published_doi,
+        published_date = as.Date(published_date),
+        api_match = TRUE
+      )
+  }
+  
+  doi %>%
+    unique() %>%
+    map_dfr(\(current_doi) {
+      result <- fetch_one(current_doi)
+      Sys.sleep(0.5)
+      result
+    })
+}
