@@ -8,12 +8,12 @@ We also explored the data and code shared by the authors in the `rustlab1/Prepri
 
 > Yin H, Ahn W, Forster PM, Rust R. Tracking claim changes from preprint to publication across 72,644 biomedical studies using large language models [Computer software]. https://github.com/rustlab1/PreprintPaperTracker
 
-Our collaborative review will be linked here once it is available:
+Our collaborative review is shared on PREReview:
 
-> **PREreview:** [link forthcoming]
-
+> Miller J, Rogel-Salazar R, Spick M, Olatoye TI, **Li X**, et al. 2026. _PREreview of "Tracking claim changes from preprint to publication across 72,644 biomedical studies using large language models"_ **PREreview**. https://prereview.org/reviews/23046638. Also archived on Zenodo. doi:[10.5281/zenodo.23046638](https://doi.org/10.5281/zenodo.23046638)
 
 <br>
+
 
 ## Scope and limitations
 
