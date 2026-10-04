@@ -12,7 +12,7 @@ Our collaborative review is shared on PREReview:
 
 > Miller J, Rogel-Salazar R, Spick M, Olatoye TI, **Li X**, Aman S, Khetarpal N, Akuma I, Dogan G, Kirilova D, and Osadebe N. 2026. _PREreview of "Tracking claim changes from preprint to publication across 72,644 biomedical studies using large language models"_ **PREreview**. https://prereview.org/reviews/23046638. Also archived on Zenodo. doi:[10.5281/zenodo.23046638](https://doi.org/10.5281/zenodo.23046638)
 
-*The order of review authors on PREreview reflects the sequence in which co-authors are added and confirmed during the collaborative submission workflow.*
+*Note: PREreview author order reflects the sequence in which co-authors confirm participation.*
 
 <br>
 
